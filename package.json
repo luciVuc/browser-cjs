@@ -1,0 +1,26 @@
+{
+  "name": "browser-cjs",
+  "version": "1.0.0",
+  "description": "A minimal CommonJS module loader for the browser environment.",
+  "main": "require.js",
+  "scripts": {
+    "build": "babel --presets @babel/env --watch require.es6 --out-file require.js"
+  },
+  "keywords": [
+    "require",
+    "js",
+    "browser",
+    "commonjs",
+    "cjs",
+    "module loader",
+    "nodejs"
+  ],
+  "author": "Lucian Vuc (https://github.com/luciVuc)",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5"
+  },
+  "dependencies": {}
+}
