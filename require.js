@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * A minimal CommonJS (nodejs-like) module loader for the browser environment.
+ * A minimal CommonJS-compatible (nodejs-like) module loader for the browser environment.
  */
 window.require = typeof require === "function" ? function (require, document) {
   var tmp = document.querySelector("script[data-main]");
@@ -12,7 +12,11 @@ window.require = typeof require === "function" ? function (require, document) {
 
   return require;
 }(require, document) : function (document) {
-  // load prerequisites (non-CJS scripts, stylesheets, etc.)
+  /**
+   * load prerequisites (non-CJS scripts, stylesheets, etc.)
+   *
+   * @returns {String} The base directory
+   */
   function loadPrerequisites() {
     var head = document.head;
     var tmpScripts = document.querySelector("script[data-scripts]");
@@ -51,6 +55,13 @@ window.require = typeof require === "function" ? function (require, document) {
 
     return baseDir;
   }
+  /**
+   * Performs a synchronous XHR
+   *
+   * @param {String} url The request URL
+   * @returns {XMLHttpRequest} The XHR instance
+   */
+
 
   function getSynchXHR(url) {
     var xhr = new XMLHttpRequest();
@@ -58,20 +69,31 @@ window.require = typeof require === "function" ? function (require, document) {
     xhr.send();
     return xhr;
   }
+  /**
+   * If the file path given as argument does not have an extension
+   * (such as `.js`, `.es6`, `.json`, etc.), the assumption is that
+   * it is a package, and it tries to determine the file name designated
+   * as **main** in the `package.json` file, and attach it to the 
+   * given file path.
+   *
+   * @param {String} filePath
+   * @returns {String} The complete file path, including the main file name
+   */
 
-  function getFileName(fileName) {
-    fileName = typeof fileName === "string" ? fileName : "";
 
-    if (fileName.indexOf(".") < 0) {
-      var xhr = getSynchXHR("".concat(fileName, "/package.json"));
+  function getFileName(filePath) {
+    filePath = typeof filePath === "string" ? filePath : "";
+
+    if (filePath.indexOf(".") < 0) {
+      var xhr = getSynchXHR("".concat(filePath, "/package.json"));
 
       if (xhr.status === 200) {
         var pack = JSON.parse(xhr.responseText);
-        fileName = fileName + "/" + pack.main;
+        filePath = filePath + "/" + pack.main;
       }
     }
 
-    return fileName;
+    return filePath;
   }
 
   return function () {
@@ -89,8 +111,7 @@ window.require = typeof require === "function" ? function (require, document) {
 
     function require(dirname, file) {
       file = typeof file === "string" ? file.trim() : "";
-      var uri = new URL(file, dirname); // uri.pathname += uri.pathname.indexOf(".") >= 0 ? "" : "/index.js";
-
+      var uri = new URL(file, dirname);
       uri.pathname = getFileName(uri.pathname);
       dirname = uri.href.substr(0, uri.href.lastIndexOf("/") + 1);
       var filename = uri.pathname.substr(uri.pathname.lastIndexOf("/") + 1);
