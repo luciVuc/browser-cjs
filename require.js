@@ -1,5 +1,28 @@
 "use strict";
 
+/*
+Copyright (c) 2019 Lucian Vuc <https://github.com/luciVuc>
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 /**
  * A minimal CommonJS-compatible (nodejs-like) module loader for the browser environment.
  */
@@ -12,11 +35,14 @@ window.require = typeof require === "function" ? function (require, document) {
 
   return require;
 }(require, document) : function (document) {
+  var COMMA_DELIMITER = /,[ ]*/gim;
+  var SLASH_DELIMITER = /[\/]+/gmi;
   /**
    * load prerequisites (non-CJS scripts, stylesheets, etc.)
    *
    * @returns {String} The base directory
    */
+
   function loadPrerequisites() {
     var head = document.head;
     var tmpScripts = document.querySelector("script[data-scripts]");
@@ -24,18 +50,19 @@ window.require = typeof require === "function" ? function (require, document) {
     var styles = tmpStyles ? tmpStyles.dataset.styles : "";
     var scripts = tmpScripts ? tmpScripts.dataset.scripts : "";
     var tmpBaseDir = document.querySelector("script[data-base_dir]");
-    var baseDir = tmpBaseDir ? tmpBaseDir.dataset.base_dir : "/";
     var tag;
+    var baseDir = tmpBaseDir && tmpBaseDir.dataset.base_dir;
+    baseDir = baseDir && typeof baseDir === "string" ? baseDir : "./";
+    baseDir = new URL(baseDir, location.href).href;
 
-    if (baseDir && typeof baseDir === "string") {
-      baseDir = new URL(baseDir.trim(), location.origin).href;
+    if (baseDir) {
       tag = document.createElement("base");
       tag.setAttribute("href", baseDir);
       head.append(tag);
     }
 
     if (typeof styles === "string") {
-      styles.trim().replace(/,[ ]*/gim, ",").split(",").forEach(function (url) {
+      styles.trim().replace(COMMA_DELIMITER, ",").split(",").forEach(function (url) {
         tag = document.createElement("link");
         tag.setAttribute("rel", "stylesheet");
         tag.setAttribute("type", "text/css");
@@ -45,7 +72,7 @@ window.require = typeof require === "function" ? function (require, document) {
     }
 
     if (typeof scripts === "string") {
-      scripts.trim().replace(/,[ ]*/gim, ",").split(",").forEach(function (url) {
+      scripts.trim().replace(COMMA_DELIMITER, ",").split(",").forEach(function (url) {
         tag = document.createElement("script");
         tag.setAttribute("type", "text/javascript");
         tag.setAttribute("src", url.trim());
