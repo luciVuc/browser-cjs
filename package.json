@@ -24,8 +24,8 @@
     "type": "git",
     "url": "https://github.com/luciVuc/browser-cjs"
   },
-  "homepage": "https://github.com/luciVuc/browser-cjs#readme.md",
-  "author": "Lucian Vuc (https://github.com/luciVuc)",
+  "homepage": "https://lucivuc.github.io/browser-cjs",
+  "author": "Lucian Vuc (https://lucivuc.github.io/)",
   "license": "MIT",
   "devDependencies": {
     "@babel/cli": "^7.4.4",
